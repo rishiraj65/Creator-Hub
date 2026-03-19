@@ -11,21 +11,27 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS configuration
-origins = [
-    "https://creator-hub-6b8w.vercel.app",
-    "https://creator-hub-2.onrender.com",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+from fastapi import Response, Request
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Manual CORS Middleware (Nuclear Option)
+@app.middleware("http")
+async def add_cors_headers(request: Request, call_next):
+    # Handle preflight (OPTIONS) requests
+    if request.method == "OPTIONS":
+        response = Response()
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        return response
+    
+    # Handle actual requests
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+    return response
 
 app.include_router(products.router, prefix="/api/products", tags=["products"])
 app.include_router(forum.router, prefix="/api/forum", tags=["forum"])
