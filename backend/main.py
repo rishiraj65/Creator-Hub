@@ -12,16 +12,17 @@ app = FastAPI(
 )
 
 # CORS configuration
-origins_str = os.getenv("CORS_ORIGINS", "*")
-if origins_str == "*":
-    origins = ["*"]
-else:
-    origins = [o.strip() for o in origins_str.split(",")]
+origins = [
+    "https://creator-hub-6b8w.vercel.app",
+    "https://creator-hub-2.onrender.com",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=False,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
