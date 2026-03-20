@@ -67,7 +67,7 @@ export function ProfileView({ stats, orders, market }: ProfileViewProps) {
             </div>
             <div>
               <p className="text-gray-400 text-xs">Bitcoin (BTC)</p>
-              <p className="text-lg font-bold text-white">${market.btc_price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+              <p className="text-lg font-bold text-white">₹{market.btc_price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
             </div>
           </motion.div>
           
@@ -82,7 +82,7 @@ export function ProfileView({ stats, orders, market }: ProfileViewProps) {
             </div>
             <div>
               <p className="text-gray-400 text-xs">Ethereum (ETH)</p>
-              <p className="text-lg font-bold text-white">${market.eth_price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+              <p className="text-lg font-bold text-white">₹{market.eth_price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
             </div>
           </motion.div>
 
@@ -127,7 +127,7 @@ export function ProfileView({ stats, orders, market }: ProfileViewProps) {
                     <td className="p-4 font-mono text-sm">{order.id}</td>
                     <td className="p-4">{order.date}</td>
                     <td className="p-4 text-white font-medium">{order.product}</td>
-                    <td className="p-4 font-bold">{order.amount}</td>
+                    <td className="p-4 font-bold">{order.amount.replace('$', '₹')}</td>
                     <td className="p-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         order.status === 'Completed' ? 'bg-white/10 text-white' : 'bg-zinc-800 text-zinc-400'

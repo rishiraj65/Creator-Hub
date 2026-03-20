@@ -86,7 +86,7 @@ export function CartSidebar() {
                             className="text-sm scale-90 origin-left"
                           />
                         </div>
-                        <span className="font-bold text-white">${(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="font-bold text-white">₹{(item.price * item.quantity).toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -99,7 +99,7 @@ export function CartSidebar() {
               <div className="p-6 border-t border-white/10 bg-black/20">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-gray-400">Subtotal</span>
-                  <span className="text-xl font-bold text-white">${totalPrice.toFixed(2)}</span>
+                  <span className="text-xl font-bold text-white">₹{totalPrice.toFixed(2)}</span>
                 </div>
                 <Button className="w-full py-6 text-base font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 border-0 shadow-[0_0_20px_rgba(0,168,107,0.3)] hover:shadow-[0_0_30px_rgba(0,168,107,0.5)] transition-all rounded-xl">
                   Proceed to Checkout

@@ -3,9 +3,12 @@
 import { useRef } from "react"
 import { Component as RevolutionHero } from "@/components/revolution-hero"
 import { motion, useScroll, useTransform, Variants } from "framer-motion"
-import { Bot, LineChart, Code, PenTool, Zap, BarChart } from "lucide-react"
+import { Bot, LineChart, Code, PenTool, Zap, BarChart, Heart, Loader2 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
+import { useCart } from "@/lib/cart-context"
+import { api } from "@/lib/api"
 import Link from "next/link"
+import { useState, useEffect } from "react"
 
 const categories = [
   { icon: Bot, name: "AI Tools", desc: "Automate and generate" },
@@ -16,16 +19,7 @@ const categories = [
   { icon: LineChart, name: "Analytics Tools", desc: "Data insights" },
 ]
 
-const featuredProducts = [
-  { name: "Super UI Kit", category: "Design Resources", price: "$49", rating: 4.8 },
-  { name: "AI Copywriter Pro", category: "AI Tools", price: "$29/mo", rating: 4.9 },
-  { name: "SaaS Boilerplate", category: "Developer Tools", price: "$99", rating: 5.0 },
-  { name: "GrowX Analytics", category: "Analytics Tools", price: "$15/mo", rating: 4.6 },
-  { name: "Social Flow", category: "Marketing Tools", price: "$24/mo", rating: 4.7 },
-  { name: "Email Automator", category: "Business Automation", price: "$39", rating: 4.5 },
-  { name: "Creator 3D Assets", category: "Design Resources", price: "$59", rating: 4.9 },
-  { name: "API Rate Limiter", category: "Developer Tools", price: "$19", rating: 4.8 },
-]
+// We will fetch products dynamically from the backend
 
 // Premium easing curve
 const transition = {
@@ -51,11 +45,71 @@ const itemVariants: Variants = {
 
 export default function Page() {
   const { isAuthenticated } = useAuth()
+  const { addToCart } = useCart()
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   })
+
+  const [products, setProducts] = useState<any[]>([])
+  const [savedIds, setSavedIds] = useState<number[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true)
+        const productsData = await api.products.list()
+        setProducts(productsData.slice(0, 8))
+        setError(null)
+      } catch (err: any) {
+        console.error("Homepage fetch error:", err)
+        setError(err.message || "Failed to load products")
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProducts()
+  }, [])
+
+  useEffect(() => {
+    const fetchSaved = async () => {
+      if (!isAuthenticated) {
+        setSavedIds([])
+        return
+      }
+      try {
+        const savedData = await api.dashboard.getSavedTools()
+        setSavedIds(savedData.saved_products.map((p: any) => p.id))
+      } catch (err) {
+        console.error("Failed to fetch saved tools:", err)
+      }
+    }
+    fetchSaved()
+  }, [isAuthenticated])
+
+  const toggleSave = async (id: number) => {
+    if (!isAuthenticated) return
+    const isSaved = savedIds.includes(id)
+    if (isSaved) {
+      setSavedIds(prev => prev.filter(sid => sid !== id))
+    } else {
+      setSavedIds(prev => [...prev, id])
+    }
+    try {
+      if (isSaved) await api.products.unsave(id)
+      else await api.products.save(id)
+    } catch (e) {
+      if (isSaved) setSavedIds(prev => [...prev, id])
+      else setSavedIds(prev => prev.filter(sid => sid !== id))
+    }
+  }
+
+  const parsePrice = (priceStr: string) => {
+    return parseFloat(priceStr.replace(/[^0-9.]/g, '')) || 0
+  }
 
   // Subtle parallax for background blobs
   const blob1Y = useTransform(scrollYProgress, [0, 1], [0, 150])
@@ -142,14 +196,27 @@ export default function Page() {
 
           <motion.div 
             initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
+            animate="show"
             variants={containerVariants}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
           >
-            {featuredProducts.map((prod) => (
+            {loading ? (
+              <div className="col-span-full py-12 flex flex-col items-center justify-center text-center">
+                <Loader2 className="w-10 h-10 text-white animate-spin mb-4" />
+                <p className="text-gray-400">Loading premium tools...</p>
+              </div>
+            ) : error ? (
+              <div className="col-span-full py-12 flex flex-col items-center justify-center text-center border border-white/5 bg-white/5 rounded-2xl">
+                <p className="text-red-400 mb-2">Error: {error}</p>
+                <button onClick={() => window.location.reload()} className="text-sm text-white underline">Try Again</button>
+              </div>
+            ) : products.length === 0 ? (
+              <div className="col-span-full py-12 flex flex-col items-center justify-center text-center border border-white/5 border-dashed rounded-2xl">
+                <p className="text-gray-500">No tools found in the spotlight.</p>
+              </div>
+            ) : products.map((prod) => (
               <motion.div
-                key={prod.name}
+                key={prod.id}
                 variants={itemVariants}
                 whileHover={{ y: -10, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } }}
                 className="group p-5 rounded-2xl bg-white/[0.02] backdrop-blur-lg border border-white/10 hover:border-white/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] flex flex-col"
@@ -159,17 +226,37 @@ export default function Page() {
                    <div className="absolute inset-0 flex items-center justify-center">
                      <span className="text-zinc-500 font-bold text-2xl group-hover:scale-110 transition-transform duration-500">{prod.name[0]}</span>
                    </div>
+                   <button 
+                     onClick={(e) => {
+                       e.preventDefault();
+                       if (!isAuthenticated) {
+                         window.location.href = "/login";
+                         return;
+                       }
+                       toggleSave(prod.id);
+                     }}
+                     className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md border border-white/10 transition-all duration-300 ${
+                       savedIds.includes(prod.id) 
+                         ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.3)]" 
+                         : "bg-black/40 text-white/40 hover:text-white"
+                     }`}
+                   >
+                     <Heart className={`w-4 h-4 ${savedIds.includes(prod.id) ? "fill-current" : ""}`} />
+                   </button>
                 </div>
                 <div className="flex flex-col flex-1">
                   <div className="text-xs font-semibold text-zinc-400 mb-1">{prod.category}</div>
-                  <h3 className="text-lg font-bold text-gray-100 mb-1">{prod.name}</h3>
+                  <h3 className="text-lg font-bold text-gray-100 mb-1 line-clamp-1">{prod.name}</h3>
                   <div className="flex items-center text-zinc-400 text-sm mb-4">
                     {"★".repeat(Math.floor(prod.rating))}
                     <span className="text-zinc-600 ml-2">{prod.rating}</span>
                   </div>
                   <div className="mt-auto flex items-center justify-between">
                     <span className="text-lg font-bold text-white">{prod.price}</span>
-                    <button className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white hover:text-black text-gray-300 text-sm font-medium transition-colors active:scale-95 shadow-lg">
+                    <button 
+                      onClick={() => addToCart({ id: String(prod.id), name: prod.name, price: parsePrice(prod.price), category: prod.category })}
+                      className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white hover:text-black text-gray-300 text-sm font-medium transition-colors active:scale-95 shadow-lg"
+                    >
                       Add to Cart
                     </button>
                   </div>

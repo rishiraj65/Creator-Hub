@@ -141,11 +141,12 @@ export default function ProductsPage() {
               {/* Price Range */}
               <div>
                 <h3 className="text-white font-medium mb-3 flex items-center justify-between">
-                  Max Price: ${priceRange}
+                  Max Price: ₹{priceRange}
                 </h3>
                 <input 
                   type="range" 
-                  min="0" max="100" 
+                  min="0" max="10000" 
+                  step="100"
                   value={priceRange} 
                   onChange={(e) => setPriceRange(Number(e.target.value))}
                   className="w-full accent-white cursor-pointer"

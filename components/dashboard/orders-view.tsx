@@ -89,7 +89,7 @@ export function OrdersView() {
                     <td className="p-4 font-mono text-sm">{order.id}</td>
                     <td className="p-4">{order.date}</td>
                     <td className="p-4 text-white font-medium">{order.product}</td>
-                    <td className="p-4 font-bold">{order.amount}</td>
+                    <td className="p-4 font-bold">{order.amount.replace('$', '₹')}</td>
                     <td className="p-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         order.status === 'Completed' ? 'bg-white/10 text-white' : 'bg-zinc-800 text-zinc-400'

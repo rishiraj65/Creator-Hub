@@ -40,7 +40,7 @@ def get_cart(
             "product_id": item.product_id,
             "quantity": item.quantity,
             "name": item.product.name,
-            "price": float(item.product.price.replace('$', '').replace('/mo', '')),
+            "price": float(''.join(c for c in item.product.price if c.isdigit() or c == '.')),
             "category": item.product.category
         })
     return items

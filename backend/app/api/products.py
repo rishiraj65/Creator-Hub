@@ -19,6 +19,17 @@ def read_products(
     products = db.query(Product).offset(skip).limit(limit).all()
     return products
 
+import random
+@router.get("/update-prices-temp")
+def update_prices_temp(db: Session = Depends(get_db)):
+    products = db.query(Product).all()
+    count = 0
+    for p in products:
+        p.price = f"₹{random.randint(9, 29)}"
+        count += 1
+    db.commit()
+    return {"updated": count}
+
 @router.post("/", response_model=ProductSchema)
 def create_product(
     product_in: ProductCreate,
