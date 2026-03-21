@@ -67,5 +67,15 @@ export const api = {
       method: "POST", 
       body: JSON.stringify({ messages })
     }),
+  },
+  payments: {
+    createOrder: (data: { amount: number, product_name: string }) => fetcher("/payments/create-order", { 
+      method: "POST", 
+      body: JSON.stringify(data) 
+    }),
+    verify: (data: any) => fetcher("/payments/verify", { 
+      method: "POST", 
+      body: JSON.stringify(data) 
+    }),
   }
 }

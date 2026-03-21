@@ -25,17 +25,17 @@ def update_prices():
             ("API Rate Limiter", "Developer Tools", 4.8),
         ]
         for name, cat, rating in featured_names:
-            price = f"₹{random.randint(9, 29)}"
+            price = "₹1"
             p = Product(name=name, category=cat, rating=rating, price=price, description=f"Premium {cat} tool.")
             db.add(p)
         db.commit()
-        print("Products inserted with Rupee prices.")
+        print("Products inserted with ₹1 prices.")
     else:
         print(f"Found {len(products)} products. Updating prices...")
         for p in products:
-            p.price = f"₹{random.randint(9, 29)}"
+            p.price = "₹1"
         db.commit()
-        print("Prices updated successfully.")
+        print("Prices updated successfully to ₹1.")
         
     db.close()
 

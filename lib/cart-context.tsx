@@ -23,6 +23,7 @@ type CartContextType = {
   isCartOpen: boolean;
   setIsCartOpen: (isOpen: boolean) => void;
   refreshCart: () => Promise<void>;
+  clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -116,6 +117,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const totalPrice = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
 
+  const clearCart = () => {
+    setItems([])
+    if (!isAuthenticated) {
+      localStorage.removeItem("guest-cart")
+    }
+  }
+
   return (
     <CartContext.Provider value={{
       items,
@@ -126,7 +134,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       totalItems,
       isCartOpen,
       setIsCartOpen,
-      refreshCart
+      refreshCart,
+      clearCart
     }}>
       {children}
     </CartContext.Provider>

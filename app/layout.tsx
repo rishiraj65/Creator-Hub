@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google"
+import Script from "next/script"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -72,6 +73,11 @@ export default function RootLayout({
               <Footer />
               <Chatbot />
               <CartSidebar />
+              <Script
+                id="razorpay-checkout"
+                src="https://checkout.razorpay.com/v1/checkout.js"
+                strategy="lazyOnload"
+              />
             </ThemeProvider>
           </CartProvider>
         </AuthProvider>

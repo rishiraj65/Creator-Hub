@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import products, forum, dashboard, cart, chat
+from app.api import products, forum, dashboard, cart, chat, payments
 from app.models import product, order, saved_product, cart_item
 import uvicorn
 
@@ -34,6 +34,7 @@ async def add_cors_headers(request: Request, call_next):
     return response
 
 app.include_router(products.router, prefix="/api/products", tags=["products"])
+app.include_router(payments.router, prefix="/api/payments", tags=["payments"])
 app.include_router(forum.router, prefix="/api/forum", tags=["forum"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"])
 app.include_router(cart.router, prefix="/api/cart", tags=["cart"])
