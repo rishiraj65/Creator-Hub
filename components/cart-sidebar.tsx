@@ -39,8 +39,17 @@ export function CartSidebar() {
       })
 
       // 2. Open Razorpay Modal
+      const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
+      
+      if (!razorpayKey || razorpayKey === "rzp_test_your_key_id") {
+        console.error("Razorpay Key ID is missing or invalid")
+        alert("Payment system is not configured correctly. Please check environment variables.")
+        setIsProcessing(false)
+        return
+      }
+
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_your_key_id",
+        key: razorpayKey,
         amount: order.amount,
         currency: order.currency,
         name: "CreatorHub",
